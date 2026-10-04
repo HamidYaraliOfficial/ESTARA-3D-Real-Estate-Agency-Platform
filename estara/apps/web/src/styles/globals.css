@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* -------------------------------------------------------------------------
+   ESTARA theme tokens.
+   Five themes are supported via [data-theme] on <html>:
+     light   - default light UI
+     dark    - default dark UI
+     windows - Windows 11 "Mica" inspired look (light, frosted, rounded)
+     red     - accent theme, red highlight color
+     blue    - accent theme, blue highlight color
+   ---------------------------------------------------------------------- */
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222 20% 12%;
+  --surface: 0 0% 98%;
+  --border: 220 14% 88%;
+  --accent: 217 91% 60%;
+  --accent-foreground: 0 0% 100%;
+  --muted: 220 9% 46%;
+  --font-sans: "Segoe UI", "Vazirmatn", "Inter", system-ui, sans-serif;
+  --radius: 8px;
+}
+
+html[data-theme="dark"] {
+  --background: 222 24% 8%;
+  --foreground: 210 20% 96%;
+  --surface: 222 20% 12%;
+  --border: 222 14% 22%;
+  --accent: 217 91% 65%;
+  --accent-foreground: 222 24% 8%;
+  --muted: 218 10% 65%;
+}
+
+/* Windows 11 default: light, Mica-style translucency, generous rounding,
+   Fluent accent blue. */
+html[data-theme="windows"] {
+  --background: 210 20% 96%;
+  --foreground: 222 20% 14%;
+  --surface: 0 0% 100%;
+  --border: 214 20% 87%;
+  --accent: 206 100% 50%;
+  --accent-foreground: 0 0% 100%;
+  --muted: 215 12% 45%;
+  --radius: 8px;
+}
+
+html[data-theme="red"] {
+  --accent: 355 78% 50%;
+  --accent-foreground: 0 0% 100%;
+}
+
+html[data-theme="blue"] {
+  --accent: 213 90% 48%;
+  --accent-foreground: 0 0% 100%;
+}
+
+html[dir="rtl"] {
+  --font-sans: "Vazirmatn", "Segoe UI", system-ui, sans-serif;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+/* Windows 11 "Mica" surface used by cards, nav bar, and panels. */
+.mica-surface {
+  background: color-mix(in srgb, hsl(var(--surface)) 82%, transparent);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+}
+
+html[data-theme="windows"] .mica-surface {
+  box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.18);
+}
+
+.accent-bg {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+::selection {
+  background: hsl(var(--accent) / 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

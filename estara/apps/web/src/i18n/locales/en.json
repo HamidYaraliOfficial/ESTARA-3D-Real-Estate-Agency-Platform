@@ -1,0 +1,68 @@
+{
+  "nav": {
+    "discover": "Discover",
+    "properties": "Properties",
+    "neighborhoods": "Neighborhoods",
+    "agents": "Agents",
+    "appointments": "Book a Viewing",
+    "login": "Log in"
+  },
+  "hero": {
+    "title": "Find your next address in three dimensions",
+    "subtitle": "Scroll to explore a living map of the city — from neighborhoods to the exact unit you'll call home.",
+    "searchPlaceholder": "City, neighborhood or property title",
+    "tabs": { "buy": "Buy", "rent": "Rent", "commercial": "Commercial", "land": "Land", "newProject": "New Projects" },
+    "cta": "Search properties"
+  },
+  "filters": {
+    "location": "Location",
+    "priceRange": "Price range",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "propertyType": "Property type",
+    "area": "Area (m²)",
+    "apply": "Apply filters"
+  },
+  "property": {
+    "featured": "Featured",
+    "viewDetails": "View details",
+    "bedrooms": "Bed",
+    "bathrooms": "Bath",
+    "area": "m²",
+    "scheduleViewing": "Schedule a viewing",
+    "save": "Save",
+    "compare": "Compare"
+  },
+  "appointments": {
+    "title": "Schedule a Viewing",
+    "subtitle": "Pick a time that works for you — availability updates in real time.",
+    "currentTime": "Agent's current time",
+    "nextSlot": "Next available slot",
+    "timeUntilNext": "Time until next slot",
+    "closedToday": "Closed at this time",
+    "yourName": "Full name",
+    "yourEmail": "Email",
+    "yourPhone": "Phone",
+    "notes": "Notes (optional)",
+    "confirm": "Confirm appointment",
+    "businessHours": "Business hours",
+    "day": "Day",
+    "open": "Open",
+    "close": "Close",
+    "closed": "Closed",
+    "breakStart": "Break start",
+    "breakEnd": "Break end",
+    "slotDuration": "Slot duration (minutes)",
+    "saveHours": "Save business hours",
+    "days": {
+      "0": "Sunday", "1": "Monday", "2": "Tuesday", "3": "Wednesday",
+      "4": "Thursday", "5": "Friday", "6": "Saturday"
+    }
+  },
+  "theme": {
+    "light": "Light", "dark": "Dark", "windows": "Windows 11", "red": "Red", "blue": "Blue"
+  },
+  "footer": {
+    "rights": "All rights reserved."
+  }
+}

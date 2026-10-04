@@ -1,0 +1,381 @@
+// ESTARA - Core database schema
+// PostgreSQL + PostGIS. Run `npm run prisma:migrate` after `docker compose up -d postgres`.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Tenancy & Identity
+// ---------------------------------------------------------------------------
+
+model Agency {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  logoUrl     String?
+  primaryColor String  @default("#2563eb")
+  domain      String?  @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  agents      Agent[]
+  properties  Property[]
+  users       User[]
+
+  @@index([slug])
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  AGENCY_ADMIN
+  MANAGER
+  AGENT
+  CONTENT_EDITOR
+  CUSTOMER
+}
+
+model User {
+  id            String   @id @default(uuid())
+  agencyId      String?
+  agency        Agency?  @relation(fields: [agencyId], references: [id])
+  email         String   @unique
+  passwordHash  String
+  fullName      String
+  role          UserRole @default(CUSTOMER)
+  isEmailVerified Boolean @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  agentProfile  Agent?
+  favorites     Favorite[]
+  savedSearches SavedSearch[]
+  appointmentsAsClient Appointment[] @relation("ClientUser")
+
+  @@index([agencyId])
+}
+
+model Agent {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  agencyId    String
+  agency      Agency   @relation(fields: [agencyId], references: [id])
+  fullName    String
+  phone       String
+  photoUrl    String?
+  bio         String?
+  languages   String[] @default([])
+  specialties String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  properties    Property[]
+  leads         Lead[]
+  appointments  Appointment[]
+  businessHours BusinessHours[]
+
+  @@index([agencyId])
+}
+
+// ---------------------------------------------------------------------------
+// Locations
+// ---------------------------------------------------------------------------
+
+model City {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  country   String
+  createdAt DateTime @default(now())
+
+  neighborhoods Neighborhood[]
+  properties    Property[]
+}
+
+model Neighborhood {
+  id          String  @id @default(uuid())
+  cityId      String
+  city        City    @relation(fields: [cityId], references: [id])
+  name        String
+  slug        String  @unique
+  avgPrice    Decimal? @db.Decimal(14, 2)
+  description String?
+
+  properties  Property[]
+
+  @@index([cityId])
+}
+
+// ---------------------------------------------------------------------------
+// Properties
+// ---------------------------------------------------------------------------
+
+enum ListingType {
+  BUY
+  RENT
+  COMMERCIAL
+  LAND
+  NEW_PROJECT
+}
+
+enum PropertyType {
+  APARTMENT
+  VILLA
+  OFFICE
+  SHOP
+  WAREHOUSE
+  LAND
+}
+
+enum PropertyStatus {
+  DRAFT
+  IN_REVIEW
+  PUBLISHED
+  RESERVED
+  SOLD
+  RENTED
+  ARCHIVED
+}
+
+model Property {
+  id              String         @id @default(uuid())
+  agencyId        String
+  agency          Agency         @relation(fields: [agencyId], references: [id])
+  agentId         String?
+  agent           Agent?         @relation(fields: [agentId], references: [id])
+  cityId          String
+  city            City           @relation(fields: [cityId], references: [id])
+  neighborhoodId  String?
+  neighborhood    Neighborhood?  @relation(fields: [neighborhoodId], references: [id])
+
+  title           String
+  slug            String         @unique
+  description     String
+  listingType     ListingType
+  propertyType    PropertyType
+  status          PropertyStatus @default(DRAFT)
+
+  price           Decimal        @db.Decimal(14, 2)
+  currency        String         @default("USD")
+
+  areaSqm         Decimal        @db.Decimal(10, 2)
+  bedrooms        Int?
+  bathrooms       Int?
+  floor           Int?
+  totalFloors     Int?
+  yearBuilt       Int?
+  parkingSpaces   Int            @default(0)
+  amenities       String[]       @default([])
+
+  // PostGIS geography(Point, 4326) — managed via raw SQL migration for the
+  // spatial index; latitude/longitude kept here for convenience reads.
+  latitude        Float
+  longitude       Float
+
+  isFeatured      Boolean        @default(false)
+  featuredUntil   DateTime?
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  publishedAt     DateTime?
+
+  media           PropertyMedia[]
+  priceHistory    PropertyPriceHistory[]
+  statusHistory   PropertyStatusHistory[]
+  favorites       Favorite[]
+  leads           Lead[]
+  appointments    Appointment[]
+
+  @@index([agencyId, status])
+  @@index([cityId, listingType, propertyType])
+  @@index([price])
+}
+
+model PropertyMedia {
+  id         String   @id @default(uuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  url        String
+  type       String   // image | video | panorama | model3d
+  order      Int      @default(0)
+  caption    String?
+  createdAt  DateTime @default(now())
+
+  @@index([propertyId])
+}
+
+model PropertyPriceHistory {
+  id         String   @id @default(uuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  price      Decimal  @db.Decimal(14, 2)
+  currency   String
+  changedAt  DateTime @default(now())
+
+  @@index([propertyId, changedAt])
+}
+
+model PropertyStatusHistory {
+  id         String   @id @default(uuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  fromStatus PropertyStatus?
+  toStatus   PropertyStatus
+  changedAt  DateTime @default(now())
+  changedBy  String?
+
+  @@index([propertyId, changedAt])
+}
+
+// ---------------------------------------------------------------------------
+// Favorites & Saved Searches
+// ---------------------------------------------------------------------------
+
+model Favorite {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, propertyId])
+}
+
+model SavedSearch {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  filtersJson Json
+  alertOnNew Boolean  @default(true)
+  alertOnPriceDrop Boolean @default(true)
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// CRM: Leads
+// ---------------------------------------------------------------------------
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  VIEWING_SCHEDULED
+  NEGOTIATING
+  WON
+  LOST
+  ARCHIVED
+}
+
+model Lead {
+  id             String     @id @default(uuid())
+  fullName       String
+  email          String
+  phone          String
+  source         String     @default("website")
+  status         LeadStatus @default(NEW)
+  propertyId     String?
+  property       Property?  @relation(fields: [propertyId], references: [id])
+  assignedAgentId String?
+  assignedAgent  Agent?     @relation(fields: [assignedAgentId], references: [id])
+  budgetMin      Decimal?   @db.Decimal(14, 2)
+  budgetMax      Decimal?   @db.Decimal(14, 2)
+  notes          String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  statusHistory  LeadStatusHistory[]
+
+  @@index([assignedAgentId, status])
+}
+
+model LeadStatusHistory {
+  id         String     @id @default(uuid())
+  leadId     String
+  lead       Lead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  fromStatus LeadStatus?
+  toStatus   LeadStatus
+  changedAt  DateTime   @default(now())
+  changedBy  String?
+}
+
+// ---------------------------------------------------------------------------
+// Business Hours & Appointments
+// ---------------------------------------------------------------------------
+
+/// Fully user-configurable opening hours per agent, per weekday.
+/// This is what powers the "current time / time until next slot" widget.
+model BusinessHours {
+  id                   String   @id @default(uuid())
+  agentId              String
+  agent                Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  dayOfWeek            Int      // 0 = Sunday ... 6 = Saturday
+  isClosed             Boolean  @default(false)
+  openTime             String   // "09:00" (24h, local to `timezone`)
+  closeTime            String   // "18:00"
+  breakStart           String?  // optional lunch break, e.g. "13:00"
+  breakEnd             String?  // e.g. "14:00"
+  slotDurationMinutes  Int      @default(30)
+  timezone             String   @default("Asia/Baku")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@unique([agentId, dayOfWeek])
+  @@index([agentId])
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  RESCHEDULED
+  CANCELLED
+  COMPLETED
+}
+
+model Appointment {
+  id           String            @id @default(uuid())
+  agentId      String
+  agent        Agent             @relation(fields: [agentId], references: [id])
+  propertyId   String?
+  property     Property?         @relation(fields: [propertyId], references: [id])
+  clientUserId String?
+  clientUser   User?             @relation("ClientUser", fields: [clientUserId], references: [id])
+  clientName   String
+  clientEmail  String
+  clientPhone  String
+  startTime    DateTime
+  endTime      DateTime
+  status       AppointmentStatus @default(PENDING)
+  notes        String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([agentId, startTime])
+}
+
+// ---------------------------------------------------------------------------
+// Audit
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  actorId     String?
+  action      String
+  entityType  String
+  entityId    String
+  changeJson  Json?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorId, createdAt])
+}

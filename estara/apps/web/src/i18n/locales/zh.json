@@ -1,0 +1,68 @@
+{
+  "nav": {
+    "discover": "探索",
+    "properties": "房源",
+    "neighborhoods": "社区",
+    "agents": "经纪人",
+    "appointments": "预约看房",
+    "login": "登录"
+  },
+  "hero": {
+    "title": "在三维世界中寻找您的下一个住所",
+    "subtitle": "滚动浏览这座城市的动态地图——从社区到即将成为您家的那套房源。",
+    "searchPlaceholder": "城市、社区或房源标题",
+    "tabs": { "buy": "购买", "rent": "租赁", "commercial": "商业地产", "land": "土地", "newProject": "新项目" },
+    "cta": "搜索房源"
+  },
+  "filters": {
+    "location": "位置",
+    "priceRange": "价格区间",
+    "bedrooms": "卧室数量",
+    "bathrooms": "卫生间数量",
+    "propertyType": "房产类型",
+    "area": "面积（平方米）",
+    "apply": "应用筛选"
+  },
+  "property": {
+    "featured": "精选",
+    "viewDetails": "查看详情",
+    "bedrooms": "卧室",
+    "bathrooms": "卫生间",
+    "area": "平方米",
+    "scheduleViewing": "预约看房",
+    "save": "收藏",
+    "compare": "对比"
+  },
+  "appointments": {
+    "title": "预约看房时间",
+    "subtitle": "选择适合您的时间——可用时段会实时更新。",
+    "currentTime": "经纪人当前时间",
+    "nextSlot": "下一个可预约时段",
+    "timeUntilNext": "距离下一时段还有",
+    "closedToday": "此时段休息",
+    "yourName": "姓名",
+    "yourEmail": "邮箱",
+    "yourPhone": "电话",
+    "notes": "备注（可选）",
+    "confirm": "确认预约",
+    "businessHours": "营业时间",
+    "day": "星期",
+    "open": "开始时间",
+    "close": "结束时间",
+    "closed": "休息",
+    "breakStart": "休息开始",
+    "breakEnd": "休息结束",
+    "slotDuration": "每时段时长（分钟）",
+    "saveHours": "保存营业时间",
+    "days": {
+      "0": "星期日", "1": "星期一", "2": "星期二", "3": "星期三",
+      "4": "星期四", "5": "星期五", "6": "星期六"
+    }
+  },
+  "theme": {
+    "light": "浅色", "dark": "深色", "windows": "Windows 11", "red": "红色", "blue": "蓝色"
+  },
+  "footer": {
+    "rights": "版权所有。"
+  }
+}
